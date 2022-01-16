@@ -3,7 +3,7 @@ use clap::{Parser, IntoApp, ErrorKind};
 use scrust::scan;
 
 #[derive(Parser, Debug)]
-#[clap(author = "CTMarin", version = "0.1.0", about = "A simple port scanner written in Rust", long_about = None)]
+#[clap(author = "CTMarin", version = "0.3.1", about = "A simple port scanner written in Rust", long_about = None)]
 struct Scrust {
     #[clap()]
     address: String,
