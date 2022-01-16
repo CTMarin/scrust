@@ -14,7 +14,9 @@ struct Scrust {
     #[clap(short = 'e', long = "end-port", default_value_t = 65535)]
     end_port: u16
 }
-fn main() {
+
+#[tokio::main(flavor = "current_thread")]
+async fn main() {
     let args = Scrust::parse();
     if args.init_port > args.end_port {
         Scrust::into_app().error(
@@ -24,5 +26,5 @@ fn main() {
     let ip = IpAddr::from_str(&args.address).unwrap();
     let init_port = args.init_port;
     let end_port = args.end_port;
-    scan(ip, init_port, end_port);        
+    scan(ip, init_port, end_port).await;        
 }
