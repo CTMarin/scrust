@@ -11,8 +11,8 @@ enum PortState {
 } 
 
 pub async fn scan(ip: IpAddr, init_port: u16, end_port: u16) {
-    let mut open_ports: Vec<u16> = Vec::new();
-    let mut filtered_ports: Vec<u16> = Vec::new();
+    //let mut open_ports: Vec<u16> = Vec::new();
+    //let mut filtered_ports: Vec<u16> = Vec::new();
     let (sender, mut reciever) = tokio::sync::mpsc::channel(1024); 
     for port in init_port..=end_port {
         let sender_clone = sender.clone();
@@ -23,22 +23,18 @@ pub async fn scan(ip: IpAddr, init_port: u16, end_port: u16) {
     }
     
     std::mem::drop(sender);
+    println!("{}", format!("Port\t\tState\t\tService\t\tVersion").blue());
     while let Some(value) = reciever.recv().await {
         match value {
             (port, PortState::Open) => {
-                open_ports.push(port);
-                println!("{}", format!("Port {} is open", port).green())
+                println!("{}", format!("{}\t\topen", port).green());
             }
-            (port, PortState::Closed) => println!("{}", format!("Port {} is closed", port).red()),
             (port, PortState::Filtered) => {
-                filtered_ports.push(port);
-                println!("{}", format!("Port {} is filtered", port).yellow())
+                println!("{}", format!("{}\t\tfiltered", port).yellow());
             }
+            (_, _) => ()
         }
     }
-
-    println!("------------- Open Ports ------------- \n{:?}", open_ports);
-    println!("------------- Filtered Ports ------------- \n{:?}", filtered_ports);
 }
 
 async fn port_connection(ip: IpAddr, port: u16) -> PortState {
