@@ -42,5 +42,5 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: scrust-${{ matrix.target }}
-        path: /target/${{ matrix.target }}/release/${{ env.ARTIFACT_NAME }}
+        path: ./target/${{ matrix.target }}/release/${{ env.ARTIFACT_NAME }}
       
