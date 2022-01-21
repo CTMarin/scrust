@@ -23,7 +23,7 @@ jobs:
             os: macos-latest
     runs-on: ${{ matrix.os }}
     env:
-      ARTIFACT_NAME: ${{ matrix.os == 'windows-latest' && 'disco-core.exe' || 'disco-core' }}
+      ARTIFACT_NAME: ${{ matrix.os == 'windows-latest' && 'scrust.exe' || 'scrust' }}
     steps:
     - uses: actions/cache@v2
       with:
