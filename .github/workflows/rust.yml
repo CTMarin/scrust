@@ -11,6 +11,7 @@ env:
 
 jobs:
   build-scrust:
+    name: Build Scrust for ${{ matrix.os }}
     strategy:
       matrix:
         include:
@@ -21,6 +22,8 @@ jobs:
           - target: "x86_64-apple-darwin"
             os: macos-latest
     runs-on: ${{ matrix.os }}
+    env:
+      ARTIFACT_NAME: ${{ matrix.os == 'windows-latest' && 'disco-core.exe' || 'disco-core' }}
     steps:
     - uses: actions/cache@v2
       with:
@@ -31,9 +34,13 @@ jobs:
           ~/.cargo/git/db/
           target/
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      
     - uses: actions/checkout@v2
-    - name: Build
-      run: cargo build --verbose
+    - name: Build for ${{ matrix.target }}
+      run: cargo build --release --target ${{ matrix.target }}
     - name: Run tests
       run: cargo test --verbose
+    - uses: actions/upload-artifact@v2
+      with:
+        name: scrust-${{ matrix.target }}
+        path: /target/${{ matrix.target }}/release/${{ env.ARTIFACT_NAME }}
+      
