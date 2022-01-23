@@ -77,8 +77,11 @@ async fn service(port: u16) -> String {
     let services = String::from_utf8(content).unwrap();
     let pattern = RegexBuilder::new(format!("([a-zA-Z-]+)(\\s*{}/tcp)", port).as_str());
     let re = pattern.build().unwrap();
-    let caps = re.captures(&services).unwrap();
-    String::from(&caps[1])
+    let caps = re.captures(&services);
+    match caps {
+        Some(results) => String::from(&results[1]),
+        None =>  String::from("unwknown")
+    }
 }
 
 #[cfg(target_family = "windows")]
