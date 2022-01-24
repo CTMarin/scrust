@@ -60,6 +60,13 @@ async fn print_port(port: u16, state: PortState) -> ColoredString {
 }
 
 async fn port_connection(ip: IpAddr, port: u16) -> PortState {
+    // Mix for doing just one tcp stream:
+    // Do the timeout function
+    //  match timeout_result {
+    //      Err(_) => filtered,
+    //      Ok(Ok(_)) => open,
+    //      Ok(Err()) => closed
+    // 
     if let Err(_) = timeout_at(Instant::now() + Duration::from_millis(500), TcpStream::connect((ip, port))).await {
         return PortState::Filter;
     }
