@@ -94,10 +94,13 @@ async fn service(port: u16) -> String {
 #[cfg(target_family = "windows")]
 async fn service(port: u16) -> String {
     // C:\Windows\System32\drivers\etc on Windows
-    let content = tokio::fs::read("C:/Windows/System32/drivers/etc/services").await.unwrap();
+    let content = tokio::fs::read("C:\\Windows\\System32\\drivers\\etc\\services").await.unwrap();
     let services = String::from_utf8(content).unwrap();
     let pattern = RegexBuilder::new(format!("([a-zA-Z-]+)(\\s*{}/tcp)", port).as_str());
     let re = pattern.build().unwrap();
-    let caps = re.captures(&services).unwrap();
-    String::from(&caps[1])
+    let caps = re.captures(&services);
+    match caps {
+        Some(service) => String::from(&service[1]),
+        None => String::from("unknown")
+    }
 }
