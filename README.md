@@ -23,7 +23,7 @@ OPTIONS:
     - [x] Scan IP Address
     - [ ] Scan Host Name
     - [ ] Multiple Addresses
-    - [ ] Filtered Ports
+    - [x] Filtered Ports
 - [ ] Information
-    - [ ] Service Running
+    - [x] Service Running
     - [ ] Vulnerabilities
