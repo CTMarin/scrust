@@ -1,6 +1,7 @@
 use std::fmt;
 use colored::{Colorize, ColoredString};
 
+/// Represents the all states of a port during a port scan
 pub enum PortState {
     Open,
     Closed,
@@ -27,6 +28,7 @@ impl fmt::Display for PortState {
     }
 }
 
+/// Returns a formatted string about the port, its state and service running
 pub fn port_info(port: u16, state: PortState, service: String) -> ColoredString {
     let port_info = format!("{}\t\t{}\t\t{}", port, state.to_string(), service);
     state.colorize(port_info)
