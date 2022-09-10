@@ -1,5 +1,5 @@
 use std::fmt;
-use colored::{Colorize, ColoredString};
+use colored::{Colorize};
 
 /// Represents the all states of a port during a port scan
 pub enum PortState {
@@ -9,11 +9,11 @@ pub enum PortState {
 }
 
 impl PortState {
-    pub fn colorize(&self, output: String) -> ColoredString {
+    pub fn colorize(&self, output: String) -> String {
         match *self {
-            PortState::Open => output.green(),
-            PortState::Closed => output.red(),
-            PortState::Filter => output.yellow(),
+            PortState::Open => output.green().to_string(),
+            PortState::Closed => output.red().to_string(),
+            PortState::Filter => output.yellow().to_string(),
         }
     }
 }
@@ -26,10 +26,4 @@ impl fmt::Display for PortState {
             PortState::Filter => write!(f, "filter")
         }
     }
-}
-
-/// Returns a formatted string about the port, its state and service running
-pub fn port_info(port: u16, state: PortState, service: String) -> ColoredString {
-    let port_info = format!("{}\t\t{}\t\t{}", port, state.to_string(), service);
-    state.colorize(port_info)
 }
