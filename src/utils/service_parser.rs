@@ -6,8 +6,8 @@ const SERVICES: &str = include_str!("/etc/services");
 #[cfg(target_family = "windows")]
 const SERVICES: &str = include_str!("C:\\Windows\\System32\\drivers\\etc\\services");
 
-
-pub fn service_on_port(port: u16) -> String {
+// Returns the service running on the port specified as parameter
+pub fn service(port: u16) -> String {
     let pattern: RegexBuilder = RegexBuilder::new(format!("{}", String::from(format!("([a-zA-Z-]+)(\\s*{}/tcp)", port))).as_str());
     let regex: Regex = pattern.build().unwrap();
     let captures: Option<Captures> = regex.captures(SERVICES);
