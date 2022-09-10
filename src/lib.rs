@@ -9,7 +9,7 @@ use std::time::Duration;
 use std::net::IpAddr;
 use colored::Colorize;
 
-pub async fn scan(ip: IpAddr, init_port: u16, end_port: u16) {
+pub async fn scan(ip: IpAddr, init_port: u16, end_port: u16, filtered: bool) {
     let (sender, mut receiver) = tokio::sync::mpsc::channel(1024);
     for port in init_port..=end_port {
         let sender_clone = sender.clone();
@@ -21,14 +21,25 @@ pub async fn scan(ip: IpAddr, init_port: u16, end_port: u16) {
     
     drop(sender);
     println!("{}", format!("Port\t\tState\t\tService\t\tVersion").blue());
-    while let Some(value) = receiver.recv().await {
-        match value {
-            (_, PortState::Closed) => (),
-            (port, state) => {
-                println!("{}", port_info(port, state, service(port)));
-            }
+    if filtered {
+        while let Some(value) = receiver.recv().await {
+            match value {
+                (_, PortState::Closed) => (),
+                (port, state) => {
+                    println!("{}", port_info(port, state, service(port)));
+                }
+            };
         };
-    };
+    } else {
+        while let Some(value) = receiver.recv().await {
+            match value {
+                (port, PortState::Open) => {
+                    println!("{}", port_info(port, PortState::Open, service(port)));
+                }
+                _ => ()
+            };
+        }
+    }
 }
 
 async fn port_connection(ip: IpAddr, port: u16) -> PortState {
