@@ -1,15 +1,23 @@
 mod utils;
 
 use utils::service_parser::service;
-use utils::port_state::{PortState, port_info};
+use utils::port_state::{PortState};
 
 use tokio::{net::TcpStream};
 use tokio::time::{Instant, timeout_at};
 use std::time::Duration;
 use std::net::IpAddr;
-use colored::Colorize;
+use tabled::Tabled;
 
-pub async fn scan(ip: IpAddr, init_port: u16, end_port: u16, filtered: bool) {
+#[derive(Tabled)]
+pub struct ScrustOutput {
+    port: u16,
+    state: String,
+    service: String
+}
+
+pub async fn scan(ip: IpAddr, init_port: u16, end_port: u16) -> Vec<ScrustOutput> {
+    let mut table_data: Vec<ScrustOutput> = vec![];
     let (sender, mut receiver) = tokio::sync::mpsc::channel(1024);
     for port in init_port..=end_port {
         let sender_clone = sender.clone();
@@ -20,26 +28,20 @@ pub async fn scan(ip: IpAddr, init_port: u16, end_port: u16, filtered: bool) {
     }
     
     drop(sender);
-    println!("{}", format!("Port\t\tState\t\tService\t\tVersion").blue());
-    if filtered {
-        while let Some(value) = receiver.recv().await {
-            match value {
-                (_, PortState::Closed) => (),
-                (port, state) => {
-                    println!("{}", port_info(port, state, service(port)));
-                }
-            };
+    while let Some(value) = receiver.recv().await {
+        match value {
+            (_, PortState::Closed) => (),
+            (port, state) => {
+                table_data.push(ScrustOutput {
+                    port,
+                    state: state.colorize(state.to_string()),
+                    service: service(port)
+                });
+            }
         };
-    } else {
-        while let Some(value) = receiver.recv().await {
-            match value {
-                (port, PortState::Open) => {
-                    println!("{}", port_info(port, PortState::Open, service(port)));
-                }
-                _ => ()
-            };
-        }
-    }
+    };
+
+    table_data
 }
 
 async fn port_connection(ip: IpAddr, port: u16) -> PortState {
