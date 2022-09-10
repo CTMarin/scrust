@@ -10,3 +10,4 @@ clap = { version = "3.0.7", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
 colored = "2.0.0"
 regex = "1.5.4"
+tabled = { version = "0.8.0", features = ["color"] }
