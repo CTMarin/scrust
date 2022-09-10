@@ -1,9 +1,11 @@
+mod utils;
+use utils::service_parser;
+
 use tokio::{net::TcpStream};
 use tokio::time::{Instant, timeout_at};
 use std::time::Duration;
 use std::net::IpAddr;
 use colored::{Colorize, ColoredString};
-use regex::{RegexBuilder};
 use std::fmt;
 
 enum PortState {
@@ -42,7 +44,7 @@ pub async fn scan(ip: IpAddr, init_port: u16, end_port: u16) {
         });
     }
     
-    std::mem::drop(sender);
+    drop(sender);
     println!("{}", format!("Port\t\tState\t\tService\t\tVersion").blue());
     while let Some(value) = reciever.recv().await {
         match value {
@@ -78,29 +80,6 @@ async fn port_connection(ip: IpAddr, port: u16) -> PortState {
     }
 }
 
-#[cfg(target_family = "unix")]
 async fn service(port: u16) -> String {
-    let content = tokio::fs::read("/etc/services").await.unwrap();
-    let services = String::from_utf8(content).unwrap();
-    let pattern = RegexBuilder::new(format!("([a-zA-Z-]+)(\\s*{}/tcp)", port).as_str());
-    let re = pattern.build().unwrap();
-    let caps = re.captures(&services);
-    match caps {
-        Some(results) => String::from(&results[1]),
-        None =>  String::from("unwknown")
-    }
-}
-
-#[cfg(target_family = "windows")]
-async fn service(port: u16) -> String {
-    // C:\Windows\System32\drivers\etc on Windows
-    let content = tokio::fs::read("C:\\Windows\\System32\\drivers\\etc\\services").await.unwrap();
-    let services = String::from_utf8(content).unwrap();
-    let pattern = RegexBuilder::new(format!("([a-zA-Z-]+)(\\s*{}/tcp)", port).as_str());
-    let re = pattern.build().unwrap();
-    let caps = re.captures(&services);
-    match caps {
-        Some(service) => String::from(&service[1]),
-        None => String::from("unknown")
-    }
+    service_parser::service_on_port(port)
 }
