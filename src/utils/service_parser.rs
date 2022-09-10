@@ -1,6 +1,5 @@
 use regex::{Captures, Regex, RegexBuilder};
 
-
 #[cfg(target_family = "unix")]
 const SERVICES: &str = include_str!("/etc/services");
 
