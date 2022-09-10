@@ -1,6 +1,6 @@
 mod utils;
 
-use utils::service_parser;
+use utils::service_parser::service;
 use utils::port_state::{PortState, port_info};
 
 use tokio::{net::TcpStream};
@@ -9,9 +9,8 @@ use std::time::Duration;
 use std::net::IpAddr;
 use colored::Colorize;
 
-
 pub async fn scan(ip: IpAddr, init_port: u16, end_port: u16) {
-    let (sender, mut reciever) = tokio::sync::mpsc::channel(1024); 
+    let (sender, mut receiver) = tokio::sync::mpsc::channel(1024);
     for port in init_port..=end_port {
         let sender_clone = sender.clone();
         tokio::spawn(async move {
@@ -22,11 +21,11 @@ pub async fn scan(ip: IpAddr, init_port: u16, end_port: u16) {
     
     drop(sender);
     println!("{}", format!("Port\t\tState\t\tService\t\tVersion").blue());
-    while let Some(value) = reciever.recv().await {
+    while let Some(value) = receiver.recv().await {
         match value {
             (_, PortState::Closed) => (),
             (port, state) => {
-                println!("{}", port_info(port, state, service(port).await));
+                println!("{}", port_info(port, state, service(port)));
             }
         };
     };
@@ -49,8 +48,4 @@ async fn port_connection(ip: IpAddr, port: u16) -> PortState {
         Ok(_) => PortState::Open,
         Err(_) => PortState::Closed
     }
-}
-
-async fn service(port: u16) -> String {
-    service_parser::service_on_port(port)
 }
